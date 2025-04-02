@@ -20,13 +20,19 @@ dropdown_options.append({'label': 'All Sites', 'value': 'ALL'})
 dropdown_options.extend([{'label': site, 'value': site} for site in spacex_df['Launch Site'].unique()])
 
 def get_fig(dataframe, entered_site):
+    payload_xaxis = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     fig = px.scatter(
         dataframe,
         x="Payload Mass (kg)",
         y="class",
         color="Booster Version Category",
-        title=f"Correlation between Payload and Success for {entered_site}"
+        title=f"Correlation between Payload and Success for {entered_site}",
     )
+    fig.update_xaxes(
+        tickvals= payload_xaxis,
+        title_text='Payload Mean (kg)'
+    )
+
     fig.update_layout(
         xaxis_title="Payload Mass (kg)",
         yaxis_title="class",
@@ -67,9 +73,10 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
 def get_pie_chart(entered_site):
     filtered_df = spacex_df
     if entered_site == 'ALL':
+        filtered_df = filtered_df[filtered_df['class'] == 1]
         fig = px.pie(filtered_df, values='class',
         names='Launch Site',
-        title='Total Success Launches By Site')
+        title='Total Success Launches By all Sites')
         return fig
     else:
         filtered_df = filtered_df[filtered_df['Launch Site'] == entered_site]
@@ -96,7 +103,7 @@ def get_success_payload_scatter_chart(entered_site, payload_mass):
     max = payload_mass[1]
     filtered_df = filtered_df[(filtered_df['Payload Mass (kg)'] >= min) & (filtered_df['Payload Mass (kg)'] <= max)]
     if entered_site == 'ALL':
-       return get_fig(filtered_df, 'All')
+       return get_fig(filtered_df, 'all Sites')
     else:
         filtered_df = filtered_df[filtered_df['Launch Site'] == entered_site]
         return get_fig(filtered_df, entered_site)
